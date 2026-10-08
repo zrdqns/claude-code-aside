@@ -3,10 +3,10 @@ import type { EngineInterface, PluginOptions, Register } from 'claude-code'
 
 import type { Exchange } from '../types'
 
-const PANE = 'aparte'
+const PANE = 'aside'
 const TITLE = 'Aside'
-const FIELD = 'pregunta'
-const CLEAR = 'limpiar'
+const FIELD = 'question'
+const CLEAR = 'clear'
 // Exchanges the pane keeps and draws; `maxHistory` says how many ride a prompt.
 const KEPT = 12
 // A Markdown element draws at most 10000 characters.
@@ -22,23 +22,23 @@ const RULE =
   '<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="9" viewBox="0 0 100 9" preserveAspectRatio="none">' +
   '<rect y="4" width="100" height="1" fill="#9c9a92" fill-opacity="0.3"/></svg>'
 
-const exchanges = atom({ plugin: 'aparte', key: 'asked' } as const, [])
+const exchanges = atom({ plugin: 'aside', key: 'asked' } as const, [])
 
 const INTRO = [
-  'Esto es una pregunta aparte del usuario sobre la conversación de arriba.',
-  'No forma parte de la tarea: no la continúes, no propongas ediciones ni uses herramientas.',
-  'Responde en español, breve y en prosa llana, solo con lo que ya está en la conversación;',
-  'usa una lista únicamente si la pregunta pide enumerar.',
+  'This is an aside question from the user about the conversation above.',
+  'It is not part of the task: do not continue it, do not propose edits or use tools.',
+  'Answer in the language of the question, briefly and in plain prose, only with what is already in the conversation;',
+  'use a list only if the question asks for an enumeration.',
 ].join(' ')
 
 const LIVE_SYSTEM =
-  'Respondes preguntas aparte, de solo lectura, sobre una sesión de Claude Code a partir de su ' +
-  'transcripción. Sin herramientas; no continúes la tarea; responde en español, breve y en prosa llana.'
+  'You answer read-only aside questions about a Claude Code session from its ' +
+  'transcript. No tools; do not continue the task; answer in the language of the question, briefly and in plain prose.'
 
 const FAILURES: Record<string, string> = {
-  'api-error': 'El modelo no pudo responder (error de la API). Prueba otra vez.',
-  'empty-reply': 'El modelo no devolvió texto. Prueba otra vez.',
-  aborted: 'La consulta se interrumpió. Prueba otra vez.',
+  'api-error': 'The model could not answer (API error). Try again.',
+  'empty-reply': 'The model returned no text. Try again.',
+  aborted: 'The query was interrupted. Try again.',
 }
 
 type Settings = { liveFallback: boolean; liveModel: string; carried: number }
@@ -80,19 +80,19 @@ const compact = (n: number) =>
       ? `${(n / 1e3).toFixed(1)}k`
       : `${n}`
 
-const seconds = (ms: number) => `${(ms / 1000).toFixed(1).replace('.', ',')} s`
+const seconds = (ms: number) => `${(ms / 1000).toFixed(1)} s`
 
 /** What an answer cost, in one dim line. */
 const footer = (one: Exchange) =>
   [
-    ...(one.kind === 'live' ? ['en vivo'] : []),
+    ...(one.kind === 'live' ? ['live'] : []),
     seconds(one.ms),
-    ...(one.cacheRead > 0 ? [`${compact(one.cacheRead)} de caché`] : []),
+    ...(one.cacheRead > 0 ? [`${compact(one.cacheRead)} cached`] : []),
     // Paid in full: all of a live answer, or a fork whose cache had lapsed.
     ...(one.kind === 'live' || one.fresh >= 1000
-      ? [`${compact(one.fresh)} sin caché`]
+      ? [`${compact(one.fresh)} uncached`]
       : []),
-    `${compact(one.output)} de salida`,
+    `${compact(one.output)} output`,
   ].join(' · ')
 
 /**
@@ -107,11 +107,11 @@ const promptFor = (earlier: Exchange[], question: string, carried: number) =>
         one.answer === null
           ? []
           : [
-              `Pregunta aparte anterior: ${one.question}\nTu respuesta: ${one.answer.slice(0, MAX_CARRIED)}`,
+              `Earlier aside question: ${one.question}\nYour answer: ${one.answer.slice(0, MAX_CARRIED)}`,
             ],
       )
       .slice(-carried),
-    `Pregunta aparte: ${question}`,
+    `Aside question: ${question}`,
   ].join('\n\n')
 
 /** Before any turn has ended: a plain completion over the transcript's text. */
@@ -122,17 +122,17 @@ const answerLive = async (
 ): Promise<Outcome> => {
   const messages = await $.session.messages()
   if (messages.length === 0) {
-    return failed('Aún no hay nada que consultar: la conversación está vacía.')
+    return failed('Nothing to ask about yet: the conversation is empty.')
   }
   const transcript = messages
-    .map(one => `${one.role === 'user' ? 'USUARIO' : 'ASISTENTE'}: ${one.text}`)
+    .map(one => `${one.role === 'user' ? 'USER' : 'ASSISTANT'}: ${one.text}`)
     .join('\n\n')
     .slice(-LIVE_CHARS)
   const reply = await $.model.complete({
     model: cfg.liveModel,
     maxTokens: LIVE_TOKENS,
     system: LIVE_SYSTEM,
-    prompt: `Conversación hasta ahora:\n\n${transcript}\n\n${prompt}`,
+    prompt: `Conversation so far:\n\n${transcript}\n\n${prompt}`,
   })
 
   return reply.isAnswered
@@ -145,7 +145,7 @@ const answerLive = async (
           reply.usage.input_tokens + reply.usage.cache_creation_input_tokens,
         output: reply.usage.output_tokens,
       }
-    : failed(FAILURES[reply.reason] ?? 'No hubo respuesta.')
+    : failed(FAILURES[reply.reason] ?? 'There was no answer.')
 }
 
 /**
@@ -169,7 +169,7 @@ const answer = async (
     }
   }
   if (reply.reason !== 'nothing-to-fork') {
-    return failed(FAILURES[reply.reason] ?? 'No hubo respuesta.')
+    return failed(FAILURES[reply.reason] ?? 'There was no answer.')
   }
 
   return cfg.liveFallback
@@ -187,7 +187,7 @@ const settle = async ($: EngineInterface, id: number, cfg: Settings) => {
     $,
     promptFor(earlier, entry.question, cfg.carried),
     cfg,
-  ).catch(() => failed('No se pudo enviar la pregunta.'))
+  ).catch(() => failed('The question could not be sent.'))
   const ms = (await $.clock.now()) - started
   await update($, exchanges, list =>
     list.map(one => (one.id === id ? { ...one, ...outcome, ms } : one)),
@@ -224,7 +224,7 @@ export const register: Register = (on, options) => {
     await $.command.register({
       name: 'aside',
       description:
-        'Pregunta aparte sobre la conversación, sin gastar su contexto; "limpiar" borra el historial',
+        'Aside question about the conversation, without spending its context; "clear" wipes the history',
     })
     background = {
       ask: question => {
@@ -256,7 +256,7 @@ export const register: Register = (on, options) => {
   // The field and the button are answered here, not in closures on the
   // elements: a closure belongs to one drawing, and an Enter that lands while
   // the pane redraws would find it gone.
-  on('ui.input', { plugin: 'aparte' }, async ($, e, next) => {
+  on('ui.input', { plugin: 'aside' }, async ($, e, next) => {
     if (e.kind !== 'submit' || !e.element.startsWith(FIELD)) return next(e)
     if (background === undefined) await ask($, e.value, cfg)
     else background.ask(e.value)
@@ -264,7 +264,7 @@ export const register: Register = (on, options) => {
     return { element: e.element, value: e.value }
   })
 
-  on('ui.press', { plugin: 'aparte' }, async ($, e, next) => {
+  on('ui.press', { plugin: 'aside' }, async ($, e, next) => {
     if (e.element !== CLEAR) return next(e)
     await update($, exchanges, () => [])
 
@@ -289,7 +289,7 @@ export const register: Register = (on, options) => {
       if (e.surface === 'terminal') return null
       const { Svg } = $.ui.resolve(e)
 
-      return <Svg source={RULE} alt="separador" height={9} />
+      return <Svg source={RULE} alt="separator" height={9} />
     }
 
     return (
@@ -297,7 +297,7 @@ export const register: Register = (on, options) => {
         {/* A new key after each question draws the field empty again. */}
         <Input
           key={`${FIELD}-${list[0]?.id ?? 0}`}
-          placeholder="Pregunta aparte…"
+          placeholder="Ask aside…"
           submitLabel="↵"
           onSubmit={() => undefined}
         />
@@ -313,8 +313,8 @@ export const register: Register = (on, options) => {
               {one.answer === null && one.failure === null && (
                 <Text dimColor>
                   {one.isQueued
-                    ? 'esperando a que termine el turno…'
-                    : 'pensando…'}
+                    ? 'waiting for the turn to end…'
+                    : 'thinking…'}
                 </Text>
               )}
               {one.answer !== null && <Text dimColor>{footer(one)}</Text>}
@@ -325,7 +325,7 @@ export const register: Register = (on, options) => {
           <Box flexDirection="row" justifyContent="flex-end">
             <Button
               key={CLEAR}
-              label="Limpiar"
+              label="Clear"
               plain
               dimColor
               onPress={() => undefined}

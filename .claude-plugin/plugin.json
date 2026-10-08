@@ -1,26 +1,26 @@
 {
-  "name": "aparte",
-  "version": "0.2.1",
-  "description": "Chat lateral /aside para preguntar sobre la conversación sin gastar su contexto",
+  "name": "aside",
+  "version": "0.3.0",
+  "description": "/aside side chat for asking about the conversation without spending its context",
   "author": { "name": "Daniel" },
   "types": "./types/index.d.ts",
   "userConfig": {
     "liveFallback": {
       "type": "boolean",
-      "title": "Responder antes de que termine el primer turno",
-      "description": "Mientras la sesión no ha terminado su primer turno no hay conversación que bifurcar. Activado: la pregunta se responde enseguida con una consulta simple sobre el texto de la conversación (sin caché, marcada 'en vivo'). Desactivado: espera en cola y se responde al terminar el turno.",
+      "title": "Answer before the first turn ends",
+      "description": "Until the session has finished its first turn there is no conversation to fork. On: the question is answered right away with a plain query over the conversation's text (uncached, marked 'live'). Off: it waits in a queue and is answered when the turn ends.",
       "default": true
     },
     "liveModel": {
       "type": "string",
-      "title": "Modelo para las respuestas en vivo",
-      "description": "Alias o id del modelo para las respuestas 'en vivo'; la bifurcación usa siempre el modelo de la sesión.",
+      "title": "Model for live answers",
+      "description": "Alias or id of the model for 'live' answers; the fork always uses the session's model.",
       "default": "haiku"
     },
     "maxHistory": {
       "type": "number",
-      "title": "Preguntas anteriores que acompañan a cada pregunta",
-      "description": "Cuántos intercambios previos del chat lateral viajan en cada pregunta nueva.",
+      "title": "Earlier questions that ride with each question",
+      "description": "How many earlier exchanges of the side chat travel in each new question.",
       "default": 8,
       "min": 1,
       "max": 50

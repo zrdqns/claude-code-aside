@@ -1,6 +1,6 @@
 {
-  "name": "claude-code-aparte",
-  "description": "Chat lateral /aside para Claude Code: preguntas sobre la conversación sin gastar su contexto",
+  "name": "claude-code-aside",
+  "description": "/aside side chat for Claude Code: questions about the conversation without spending its context",
   "owner": { "name": "zrdqns" },
-  "plugins": [{ "name": "aparte", "source": "./" }]
+  "plugins": [{ "name": "aside", "source": "./" }]
 }

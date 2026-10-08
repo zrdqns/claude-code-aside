@@ -1,56 +1,56 @@
-# aparte
+# aside
 
-Mod para [Claude Code](https://claude.com/claude-code): un chat lateral para preguntar sobre la conversación sin gastar su contexto.
+A mod for [Claude Code](https://claude.com/claude-code): a side chat for asking about the conversation without spending its context.
 
 ```
-/aside ¿por qué eligió esa librería y no la otra?
+/aside why did it pick that library and not the other one?
 ```
 
-La pregunta y su respuesta se quedan en el panel **Aside**: el hilo principal nunca las ve, así que no ocupan su ventana de contexto ni desvían la tarea en curso.
+The question and its answer stay in the **Aside** pane: the main thread never sees them, so they take up none of its context window and do not derail the task in progress.
 
-## Cómo funciona
+## How it works
 
-- `/aside <pregunta>` abre el panel y pregunta. El panel tiene su propio campo para seguir preguntando.
-- Cada respuesta sale de una bifurcación de la conversación tal como quedó en su último turno: mismo modelo y mismo prompt de sistema, servida desde la caché de prompts y sin acceso a herramientas.
-- Antes de que termine el primer turno todavía no hay nada que bifurcar. Entonces responde «en vivo» con un modelo ligero sobre el texto de la conversación, o espera en cola a que termine el turno, según la opción `liveFallback`.
-- Bajo cada respuesta, una línea con lo que costó: tiempo, tokens servidos de caché, tokens sin caché y tokens de salida.
-- `/aside limpiar`, o el botón **Limpiar**, borra el historial del panel.
+- `/aside <question>` opens the pane and asks. The pane has its own field to keep asking.
+- Each answer comes from a fork of the conversation as its last turn left it: same model and same system prompt, served from the prompt cache and with no access to tools.
+- Before the first turn ends there is nothing to fork yet. The mod then answers "live" with a light model over the conversation's text, or waits in a queue for the turn to end, depending on the `liveFallback` option.
+- Under each answer, a line with what it cost: time, tokens served from cache, uncached tokens and output tokens.
+- `/aside clear`, or the **Clear** button, wipes the pane's history.
 
-Las respuestas salen en español, breves y en prosa.
+Answers come in the language of the question, brief and in prose.
 
-## Opciones
+## Options
 
-| Opción | Por defecto | Qué hace |
+| Option | Default | What it does |
 | --- | --- | --- |
-| `liveFallback` | `true` | Responder «en vivo» antes de que termine el primer turno. Desactivada, la pregunta espera en cola. |
-| `liveModel` | `haiku` | Modelo de las respuestas «en vivo». La bifurcación usa siempre el modelo de la sesión. |
-| `maxHistory` | `8` | Cuántos intercambios anteriores del panel acompañan a cada pregunta nueva (1 a 50). |
+| `liveFallback` | `true` | Answer "live" before the first turn ends. When off, the question waits in a queue. |
+| `liveModel` | `haiku` | Model for the "live" answers. The fork always uses the session's model. |
+| `maxHistory` | `8` | How many earlier exchanges of the pane ride with each new question (1 to 50). |
 
-## Instalación
+## Installation
 
-En el prompt de una sesión de terminal:
+At the prompt of a terminal session:
 
 ```
-/plugin install aparte --marketplace zrdqns/claude-code-aparte
+/plugin install aside --marketplace zrdqns/claude-code-aside
 ```
 
-Responde `y` para añadir el marketplace y elige el alcance (el de usuario lo carga en todas las sesiones, también en las de la app de escritorio).
+Answer `y` to add the marketplace and choose the scope (the user scope loads it in every session, including the desktop app's).
 
-Para probarlo desde una copia local, sin instalarlo:
+To try it from a local copy, without installing it:
 
 ```bash
-claude --plugin-dir ./claude-code-aparte
+claude --plugin-dir ./claude-code-aside
 ```
 
-## Desarrollo
+## Development
 
 ```bash
 claude plugin validate .
 claude plugin test .
 ```
 
-El módulo está en [`hooks/register.tsx`](hooks/register.tsx), su contrato de estado en [`types/index.d.ts`](types/index.d.ts) y los tests en [`tests/`](tests).
+The module is in [`hooks/register.tsx`](hooks/register.tsx), its state contract in [`types/index.d.ts`](types/index.d.ts) and the tests in [`tests/`](tests).
 
-## Licencia
+## License
 
 [MIT](LICENSE)

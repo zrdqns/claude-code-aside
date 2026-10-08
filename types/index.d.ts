@@ -26,6 +26,6 @@ export type Exchange = {
 
 declare module 'claude-code' {
   interface PluginState {
-    aparte: { asked: Exchange[] }
+    aside: { asked: Exchange[] }
   }
 }
