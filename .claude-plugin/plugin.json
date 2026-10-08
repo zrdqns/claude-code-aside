@@ -1,6 +1,6 @@
 {
   "name": "aparte",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Chat lateral /aside para preguntar sobre la conversación sin gastar su contexto",
   "author": { "name": "Daniel" },
   "types": "./types/index.d.ts",

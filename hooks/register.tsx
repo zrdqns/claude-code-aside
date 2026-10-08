@@ -25,7 +25,7 @@ const RULE =
 const exchanges = atom({ plugin: 'aparte', key: 'asked' } as const, [])
 
 const INTRO = [
-  'Esto es una pregunta aparte de Daniel sobre la conversación de arriba.',
+  'Esto es una pregunta aparte del usuario sobre la conversación de arriba.',
   'No forma parte de la tarea: no la continúes, no propongas ediciones ni uses herramientas.',
   'Responde en español, breve y en prosa llana, solo con lo que ya está en la conversación;',
   'usa una lista únicamente si la pregunta pide enumerar.',
