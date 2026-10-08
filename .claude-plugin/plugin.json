@@ -1,0 +1,29 @@
+{
+  "name": "aparte",
+  "version": "0.2.0",
+  "description": "Chat lateral /aside para preguntar sobre la conversación sin gastar su contexto",
+  "author": { "name": "Daniel" },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "liveFallback": {
+      "type": "boolean",
+      "title": "Responder antes de que termine el primer turno",
+      "description": "Mientras la sesión no ha terminado su primer turno no hay conversación que bifurcar. Activado: la pregunta se responde enseguida con una consulta simple sobre el texto de la conversación (sin caché, marcada 'en vivo'). Desactivado: espera en cola y se responde al terminar el turno.",
+      "default": true
+    },
+    "liveModel": {
+      "type": "string",
+      "title": "Modelo para las respuestas en vivo",
+      "description": "Alias o id del modelo para las respuestas 'en vivo'; la bifurcación usa siempre el modelo de la sesión.",
+      "default": "haiku"
+    },
+    "maxHistory": {
+      "type": "number",
+      "title": "Preguntas anteriores que acompañan a cada pregunta",
+      "description": "Cuántos intercambios previos del chat lateral viajan en cada pregunta nueva.",
+      "default": 8,
+      "min": 1,
+      "max": 50
+    }
+  }
+}
